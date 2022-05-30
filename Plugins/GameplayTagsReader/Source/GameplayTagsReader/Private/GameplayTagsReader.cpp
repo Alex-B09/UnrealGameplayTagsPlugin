@@ -30,6 +30,20 @@ FString GetHeaderFileFormat(FGameplayTagContainer tags)
 		<< "namespace Tags" << std::endl
 		<< "{" << std::endl;
 
+	for (auto tag : tags)
+	{
+		auto parsedName = tag.GetTagName().ToString();
+		parsedName = parsedName.Replace(TEXT("."), TEXT("_"));
+
+		ss << "\t"
+			<<"const FGameplayTag "
+			<< TCHAR_TO_UTF8(*parsedName.ToUpper())
+			<< " = FGameplayTag(\""
+			<< TCHAR_TO_UTF8(*(tag.GetTagName().ToString()))
+			<< "\");"
+			<< std::endl;
+
+	}
 
 	ss << "};" << std::endl;
 
@@ -79,13 +93,11 @@ void FGameplayTagsReaderModule::PluginButtonClicked()
 							FText::FromString(TEXT("GameplayTagsReader.cpp"))
 					   );
 
-	auto completeSourcePath = FPaths::GameSourceDir().Append(FApp::GetProjectName()).Append("/test.h");
+	auto completeSourcePath = FPaths::GameSourceDir().Append(FApp::GetProjectName()).Append("/Tags.h");
 	FString filePath = FPaths::ConvertRelativePathToFull(completeSourcePath);
 
 	FGameplayTagContainer allTags;
 	UGameplayTagsManager::Get().RequestAllGameplayTags(allTags, false);
-
-	auto headerPath = TCHAR_TO_UTF8(*completeSourcePath.Append("test.h"));
 
 	auto test1 = GetHeaderFileFormat(allTags);
 	FFileHelper::SaveStringToFile(test1, *filePath);
