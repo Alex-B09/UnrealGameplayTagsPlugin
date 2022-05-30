@@ -9,6 +9,9 @@
 #include "GameplayTagsManager.h"
 #include "Misc/App.h"
 #include "Misc/FileHelper.h"
+#include "SourceCodeNavigation.h"
+#include "GameProjectGenerationModule.h"
+#include "Dialogs/SOutputLogDialog.h"
 
 #include <fstream>
 #include <filesystem>
@@ -17,6 +20,23 @@
 static const FName GameplayTagsReaderTabName("GameplayTagsReader");
 
 #define LOCTEXT_NAMESPACE "FGameplayTagsReaderModule"
+
+
+void RefreshCodeProject()
+{
+	if (!FSourceCodeNavigation::IsCompilerAvailable())
+	{
+		// Attempt to trigger the tutorial if the user doesn't have a compiler installed for the project.
+		FSourceCodeNavigation::AccessOnCompilerNotFound().Broadcast();
+	}
+
+	FText FailReason, FailLog;
+	if (!FGameProjectGenerationModule::Get().UpdateCodeProject(FailReason, FailLog))
+	{
+		SOutputLogDialog::Open(LOCTEXT("RefreshProject", "Refresh Project"), FailReason, FailLog, FText::GetEmpty());
+	}
+}
+
 
 
 FString GetHeaderFileFormat(FGameplayTagContainer tags)
@@ -102,6 +122,9 @@ void FGameplayTagsReaderModule::PluginButtonClicked()
 	auto test1 = GetHeaderFileFormat(allTags);
 	FFileHelper::SaveStringToFile(test1, *filePath);
 	
+
+	RefreshCodeProject();
+
 	FMessageDialog::Open(EAppMsgType::Ok, DialogText);
 }
 

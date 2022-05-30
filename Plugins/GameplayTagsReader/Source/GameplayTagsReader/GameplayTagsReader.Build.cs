@@ -7,7 +7,13 @@ public class GameplayTagsReader : ModuleRules
 	public GameplayTagsReader(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-		
+
+		PrivateIncludePathModuleNames.AddRange(
+			new string[] {
+				"GameProjectGeneration",
+			}
+		);
+
 		PublicIncludePaths.AddRange(
 			new string[] {
 				// ... add public include paths required here ...
@@ -52,6 +58,7 @@ public class GameplayTagsReader : ModuleRules
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]
 			{
+				"GameProjectGeneration",
 				// ... add any modules that your module loads dynamically here ...
 			}
 			);
