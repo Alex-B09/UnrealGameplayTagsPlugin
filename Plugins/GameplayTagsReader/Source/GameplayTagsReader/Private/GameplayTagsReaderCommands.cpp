@@ -6,7 +6,7 @@
 
 void FGameplayTagsReaderCommands::RegisterCommands()
 {
-	UI_COMMAND(PluginAction, "GameplayTagsReader", "Execute GameplayTagsReader action", EUserInterfaceActionType::Button, FInputChord());
+	UI_COMMAND(PluginAction, "GameplayTagsReader", "Transfer BP GamplayTags to C++", EUserInterfaceActionType::Button, FInputChord());
 }
 
 #undef LOCTEXT_NAMESPACE

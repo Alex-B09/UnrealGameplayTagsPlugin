@@ -6,12 +6,36 @@
 #include "Misc/MessageDialog.h"
 #include "ToolMenus.h"
 
+#include "GameplayTagsManager.h"
+#include "Misc/App.h"
+#include "Misc/FileHelper.h"
+
 #include <fstream>
 #include <filesystem>
+#include <sstream>
 
 static const FName GameplayTagsReaderTabName("GameplayTagsReader");
 
 #define LOCTEXT_NAMESPACE "FGameplayTagsReaderModule"
+
+
+FString GetHeaderFileFormat(FGameplayTagContainer tags)
+{
+	std::stringstream ss;
+
+	ss << "#pragma once" << std::endl
+		<< std::endl
+		<< "#include \"GameplayTagContainer.h\"" << std::endl
+		<< std::endl
+		<< "namespace Tags" << std::endl
+		<< "{" << std::endl;
+
+
+	ss << "};" << std::endl;
+
+	return ss.str().c_str();
+}
+
 
 void FGameplayTagsReaderModule::StartupModule()
 {
@@ -55,13 +79,17 @@ void FGameplayTagsReaderModule::PluginButtonClicked()
 							FText::FromString(TEXT("GameplayTagsReader.cpp"))
 					   );
 
-	// open file
-	
-	auto trest = std::filesystem::current_path();
-	auto test2 = FPaths::GetProjectFilePath();
-	auto test3 = FPaths::GameSourceDir();
-	auto test4 = FPaths::ProjectConfigDir() + "DefaultGameplayTags.ini";
+	auto completeSourcePath = FPaths::GameSourceDir().Append(FApp::GetProjectName()).Append("/test.h");
+	FString filePath = FPaths::ConvertRelativePathToFull(completeSourcePath);
 
+	FGameplayTagContainer allTags;
+	UGameplayTagsManager::Get().RequestAllGameplayTags(allTags, false);
+
+	auto headerPath = TCHAR_TO_UTF8(*completeSourcePath.Append("test.h"));
+
+	auto test1 = GetHeaderFileFormat(allTags);
+	FFileHelper::SaveStringToFile(test1, *filePath);
+	
 	FMessageDialog::Open(EAppMsgType::Ok, DialogText);
 }
 
