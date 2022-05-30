@@ -106,25 +106,24 @@ void FGameplayTagsReaderModule::ShutdownModule()
 
 void FGameplayTagsReaderModule::PluginButtonClicked()
 {
-	// Put your "OnButtonClicked" stuff here
-	FText DialogText = FText::Format(
-							LOCTEXT("PluginButtonDialogText", "Add code to {0} in {1} to override this button's actions"),
-							FText::FromString(TEXT("FGameplayTagsReaderModule::PluginButtonClicked()")),
-							FText::FromString(TEXT("GameplayTagsReader.cpp"))
-					   );
-
 	auto completeSourcePath = FPaths::GameSourceDir().Append(FApp::GetProjectName()).Append("/Tags.h");
 	FString filePath = FPaths::ConvertRelativePathToFull(completeSourcePath);
 
 	FGameplayTagContainer allTags;
 	UGameplayTagsManager::Get().RequestAllGameplayTags(allTags, false);
 
-	auto test1 = GetHeaderFileFormat(allTags);
-	FFileHelper::SaveStringToFile(test1, *filePath);
+	auto FileManager = &(FPlatformFileManager::Get().GetPlatformFile());
+	bool fileExists = FileManager->FileExists(*filePath);
 	
+	auto tagFileText = GetHeaderFileFormat(allTags);
+	FFileHelper::SaveStringToFile(tagFileText, *filePath);
+	
+	if (!fileExists)
+	{
+		RefreshCodeProject();
+	}
 
-	RefreshCodeProject();
-
+	FText DialogText = LOCTEXT("PluginButtonDialogText", "Tag file generated");
 	FMessageDialog::Open(EAppMsgType::Ok, DialogText);
 }
 
